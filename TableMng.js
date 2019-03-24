@@ -5,7 +5,7 @@ function TableMng() {
         //Define default options
         var defaults = {
             objMng: null,
-            conn: null
+            pool: null
         }
 
         // Create options by extending defaults with the passed in arugments
@@ -46,7 +46,7 @@ function TableMng() {
             _.options.objMng.fillParameters(opcion);
             var values = Object.values(_.options.objMng.Params);
             var params = '(' + Object.values(_.options.objMng.Params).fill('?') + ')';
-            var query = _.options.conn.query('call sp_' + _.options.objMng.TableName + params, values, function(err, res, fields) {
+            _.options.pool.query('call sp_' + _.options.objMng.TableName + params, values, function(err, res, fields) {
                 if(err) throw err;
                 if(callback) callback(res[0]);
             });

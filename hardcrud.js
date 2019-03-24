@@ -1,12 +1,13 @@
 var mysql      = require('mysql');
-var conn = mysql.createConnection({
-  host     : '38.123.205.133',
-  user     : 'usr_casc',
-  password : 'Hadalid1985$',
-  database : 'dbcasc_qa'
+var pool = mysql.createPool({
+  connectionLimit   : 10,
+  host              : '38.123.205.133',
+  user              : 'usr_casc',
+  password          : 'Hadalid1985$',
+  database          : 'dbcasc_qa'
 });
 
-conn.connect();
+//conn.connect();
 
 // function Aduana() {
 //     this.Id = 0;
@@ -52,12 +53,12 @@ var AduanaMng = require('./AduanaMng.js');
 
 var oAduana = new Aduana();
 oAduana.Id = 45;
-oAduana.Nombre = 'Gillo';
+oAduana.Nombre = 'Gil';
 oAduana.Codigo = '23';
 var oMgnAduana = new AduanaMng(oAduana);
 var oMng = new TableMng({
     objMng: oMgnAduana,
-    conn: conn
+    pool: pool
 });
 
 oMng.Action('get', function(data) {
