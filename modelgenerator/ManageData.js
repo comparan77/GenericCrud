@@ -24,13 +24,18 @@ function ManageData() {
 
     // Public Methods
     ManageData.prototype.Init = function() {
-        this._database = this.options.database;
-        this._tableName = this.options.table;
-        fillDataObjects.call(this);
+        var _ = this;
+        _._database = this.options.database;
+        _._tableName = this.options.table;
+        fillDataObjects.call(this, function() {
+            if(_._primaryKey == null)
+                _._primaryKey = _._lst[0];
+            
+        });
     }
 
     // Private Methods
-    function fillDataObjects() {
+    function fillDataObjects(callback) {
         var _ = this;
         var qry = "select column_name, data_type, case is_nullable when 'YES' then 1 else 0 end is_nullable, character_maximum_length, case column_key when 'PRI' then 1 else 0 end IsPk, case extra when 'auto_increment' then 1 else 0 end IsPkAI from information_schema.columns where table_schema = '" + this._database + "' and table_name='" + this._tableName + "';";
         //console.log(qry);
@@ -60,8 +65,8 @@ function ManageData() {
                         _._primaryKey = o;
                     }
                     _._lst.push(o);
-                  }); 
-                  console.log(_._primaryKey);
+                  });
+                callback(); 
             });
     }
 
