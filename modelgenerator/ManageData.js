@@ -14,7 +14,8 @@ function ManageData() {
         conn: null,
         database: '',
         table: '',
-        dataobject: null
+        dataobject: null,
+        common: null
     }
 
     // Create options by extending defaults with the passed in arugments
@@ -25,16 +26,28 @@ function ManageData() {
     // Public Methods
     ManageData.prototype.Init = function() {
         var _ = this;
-        _._database = this.options.database;
-        _._tableName = this.options.table;
+        _._database = _.options.database;
+        _._tableName = _.options.table.charAt(0).toUpperCase() + _.options.table.slice(1) ;
         fillDataObjects.call(this, function() {
             if(_._primaryKey == null)
                 _._primaryKey = _._lst[0];
-            
+            fillBean(_);
         });
     }
 
     // Private Methods
+    function fillBean(_) {
+
+        var strProperties = '';
+        var item;
+        for(item in _._lst) {
+            strProperties += "\tthis." + _._lst[item].FieldName + ";\n"
+        }
+
+        var strBean = "function "+ _._tableName + "() { \n" + strProperties +  "}; \nmodule.exports = " + _._tableName + ";"
+        console.log(strBean);
+    }
+
     function fillDataObjects(callback) {
         var _ = this;
         var qry = "select column_name, data_type, case is_nullable when 'YES' then 1 else 0 end is_nullable, character_maximum_length, case column_key when 'PRI' then 1 else 0 end IsPk, case extra when 'auto_increment' then 1 else 0 end IsPkAI from information_schema.columns where table_schema = '" + this._database + "' and table_name='" + this._tableName + "';";
@@ -46,9 +59,10 @@ function ManageData() {
                 Object.keys(result).forEach(function(key) {
                     var row = result[key];
                     var o = new _.options.dataobject();
-                    o.FieldName = row.column_name.toLowerCase();
+                    
+                    o.FieldName = _.options.common.Capitalize(row.column_name.toLowerCase());
                     o.IsFieldLogicalDelete = false;
-                    if(o.FieldName == 'isactive') {
+                    if(o.FieldName == 'Isactive') {
                         o.FieldName = "IsActive";
                         o.IsFieldLogicalDelete = true;
                         _._isLogigalDelete = true;
@@ -84,10 +98,13 @@ function ManageData() {
 
 var pool = require('../db.js');
 var dataobject = require('./DataObject.js')
+var Common = require('../../common/Common.js');
+
 var o = new ManageData({
     conn: pool,
     database: 'dbcasc_qa',
     table: 'aduana',
-    dataobject: dataobject
+    dataobject: dataobject,
+    common: Common
 });
 o.Init();
