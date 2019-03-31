@@ -32,7 +32,8 @@ function ManageData() {
             if(_._primaryKey == null)
                 _._primaryKey = _._lst[0];
             fillBean(_);
-            fillMng(_);
+            var lst = fillMng(_);
+            fillSQL(_, lst);
         });
     }
 
@@ -108,12 +109,157 @@ function " + _._tableName + "Mng (o, lst = null) {\n\
 \n\
 module.exports = " + _._tableName + "Mng;";
         console.log(strMng_1 + strMng_2);
+        return lst;
+    }
+
+    function fillSQL(_, lst) {
+
+        var s_SQL = '';
+        var sbSQL = '';
+        var sbHeader = "CREATE PROCEDURE `" + _._database + "`.`sp_" + _._tableName + "`(\n";
+        var sbParametros = '';
+        var sbSelect = '';
+        var sbSelectBy = '';
+        var sbInsert = '';
+        var sbInsertFields = '';
+        var sbInsertValues = '';
+        var sbUpdate = '';
+        var sbDelete = '';
+        var sbReActive = '';
+        var sbSelectEvenInactive = '';
+        var sbFooter = "END CASE;\n";
+        sbFooter += "END";
+        sbParametros+="\t IN P_opcion INT\n";
+        sbSelect+="WHEN 0 THEN\n";
+        sbSelect+="\tSELECT\n";
+        sbSelectBy+="WHEN 1 THEN\n";
+        sbSelectBy+="\tSELECT\n";
+
+        sbInsert+="WHEN 2 THEN\n";
+        sbInsert+="\tINSERT INTO " + _._tableName + " (\n";
+        sbInsertValues+="\tVALUES (\n";
+        sbUpdate+="WHEN 3 THEN\n";
+        sbUpdate+="\tUPDATE " + _._tableName + " SET\n";
+        sbDelete+="WHEN 4 THEN\n";
+        sbSelectEvenInactive+="WHEN 6 THEN\n";
+        sbSelectEvenInactive+="\tSELECT\n";
+
+        var o;
+        var item;
+        var indiceCampo = 0;
+        var indiceCampoIdAi = 0;
+
+        for(item in lst) {
+            o = lst[item];
+            if(o.IsPk)
+                sbParametros+="\t,INOUT P_" + o.FieldName + " " + o.FieldType + (o.Character_maximun_length != null ? "(" + o.Character_maximun_length + ")" : '') + "\n";
+            else
+                if(!o.IsFieldLogicalDelete)
+                    sbParametros+="\t,IN P_" + o.FieldName + " " + o.FieldType + (o.Character_maximun_length != null ? "(" + o.Character_maximun_length + ")" : '') + "\n";
+            
+            if (indiceCampoIdAi == 0)
+            {
+                if (!o.IsPk || !o.IsPkAI)
+                {
+                    sbInsertFields+="\t\t " + o.FieldName + "\n";
+                    sbInsertValues+="\t\t P_" + o.FieldName + "\n";
+                    sbUpdate+="\t\t " + o.FieldName + " = " + "P_" + o.FieldName + "\n";
+                }
+                else
+                    indiceCampoIdAi--;
+            }
+            else
+            {
+                if (!o.IsFieldLogicalDelete)
+                {
+                    sbInsertFields+="\t\t," + o.FieldName + "\n";
+                    sbInsertValues+="\t\t,P_" + o.FieldName + "\n";
+
+                    sbUpdate+="\t\t," + o.FieldName + " = " + "P_" + o.FieldName + "\n";
+                }
+            }
+
+            if (indiceCampo == 0)
+            {
+                sbSelect+="\t\t " + o.FieldName + "\n";
+                sbSelectBy+="\t\t " + o.FieldName + "\n";
+                sbSelectEvenInactive+="\t\t " + o.FieldName + "\n";
+            }
+            else
+            {
+                sbSelect+="\t\t," + o.FieldName + "\n";
+                sbSelectBy+="\t\t," + o.FieldName + "\n";
+                sbSelectEvenInactive+="\t\t," + o.FieldName + "\n";
+            }
+
+            indiceCampo++;
+            indiceCampoIdAi++;
+        }
+
+        sbParametros+=")\n";
+        sbParametros+="BEGIN\n";
+        sbParametros+="CASE P_opcion\n";
+
+        if (_._isLogigalDelete)
+            {
+                sbSelect+="\tFROM " + _._tableName + "\n";
+                sbSelect+="\tWHERE IsActive = 1;\n";
+            }
+            else
+                sbSelect+="\tFROM " + _._tableName + ";\n";
+        
+        sbSelectBy+="\tFROM " + _._tableName + "\n";
+
+        if (_._isLogigalDelete)
+            sbSelectBy+="\tWHERE " + _._primaryKey.FieldName + " = P_" + _._primaryKey.FieldName + ";\n";
+        else
+            sbSelectBy+="\tWHERE " + _._primaryKey.FieldName + " = P_" + _._primaryKey.FieldName + ";\n";
+        
+        //insert
+        sbInsertFields+="\t)\n";
+        sbInsertValues+="\t);\n";
+        if (_._primaryKey.IsPkAI)
+            sbInsertValues+="\tSET P_" + _._primaryKey.FieldName + " = LAST_INSERT_ID();\n";
+        sbInsert+=sbInsertFields;
+        sbInsert+=sbInsertValues;
+        //update
+        sbUpdate+="\tWHERE " + _._primaryKey.FieldName + " = P_" + _._primaryKey.FieldName + ";\n";
+        //delete or deactive
+        if (_._isLogigalDelete)
+                sbDelete+="\tUPDATE " + _._tableName + " SET IsActive = 0 WHERE " + _._primaryKey.FieldName + " = P_" + _._primaryKey.FieldName + ";\n";
+            else
+                sbDelete+"\tDELETE FROM " + _._tableName + " WHERE " + _._primaryKey.FieldName + " = P_" + _._primaryKey.FieldName + ";\n";
+
+        if (_._isLogigalDelete) {
+            sbReActive+="WHEN 5 THEN\n";
+            sbReActive+="\tUPDATE " + _._tableName + " SET IsActive = 1 WHERE " + _._primaryKey.FieldName + " = P_" + _._primaryKey.FieldName + ";\n";
+        }
+
+        if (_._isLogigalDelete) {
+            sbSelectEvenInactive+="\tFROM " + _._tableName + ";\n";
+        }
+
+        sbSQL+=sbHeader;
+        sbSQL+=sbParametros;
+        sbSQL+=sbSelect;
+        sbSQL+=sbSelectBy;
+        sbSQL+=sbInsert;
+        sbSQL+=sbUpdate;
+        sbSQL+=sbDelete;
+        if (_._isLogigalDelete)
+        {
+            sbSQL+=sbReActive;
+            sbSQL+=sbSelectEvenInactive;
+        }
+        sbSQL+=sbFooter;
+        s_SQL = sbSQL;
+
+        console.log(s_SQL);
     }
 
     function fillDataObjects(callback) {
         var _ = this;
         var qry = "select column_name, data_type, case is_nullable when 'YES' then 1 else 0 end is_nullable, character_maximum_length, case column_key when 'PRI' then 1 else 0 end IsPk, case extra when 'auto_increment' then 1 else 0 end IsPkAI from information_schema.columns where table_schema = '" + this._database + "' and table_name='" + this._tableName + "';";
-        //console.log(qry);
         _.options.conn.query(qry, function(err, result, fields) {
                 if(err) throw err;
                 
@@ -135,8 +281,8 @@ module.exports = " + _._tableName + "Mng;";
                     if(row.character_maximum_length!=null) {
                         o.Character_maximun_length = row.character_maximum_length;
                     }
-                    o.IsPk = row.IsPk;
-                    o.IsPkAI = row.IsPkAI;
+                    o.IsPk = row.IsPk == 1 ? true : false;
+                    o.IsPkAI = row.IsPkAI == 1 ? true : false;
                     if(o.IsPk) {
                         _._primaryKey = o;
                     }
