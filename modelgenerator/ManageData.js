@@ -32,6 +32,7 @@ function ManageData() {
             if(_._primaryKey == null)
                 _._primaryKey = _._lst[0];
             fillBean(_);
+            fillMng(_);
         });
     }
 
@@ -46,6 +47,67 @@ function ManageData() {
 
         var strBean = "function "+ _._tableName + "() { \n" + strProperties +  "}; \nmodule.exports = " + _._tableName + ";"
         console.log(strBean);
+    }
+
+    function fillMng(_) {
+
+        var strMng_2 = "";
+        var strMng_1 = "var BaseMng = require('./basemng.js');\n\
+\n\
+function " + _._tableName + "Mng (o, lst = null) {\n\
+\tBaseMng.call(this, o, '" + _._tableName + "', lst);\n\
+\n\
+\tthis.Params = {\n";
+
+        var strParams = '\t\tOption: 0,\n';
+        var item;
+        var defaultValue;
+        var strFillParam = "\tthis.Params.Option = option;\n";
+
+        var lst = _._lst.filter(function (obj) {
+            return obj.FieldName != 'IsActive';
+        });
+        
+        for(item in lst) {
+            switch (lst[item].FieldType) {
+                case 'varchar':
+                case 'char':
+                case "time":
+                case "blob":
+                case "date":
+                case "datetime":
+                    defaultValue = "''";
+                    break;
+                case "tinyint":
+                case "bit":
+                    defaultValue = "false";
+                    break;
+                case "int":
+                case "decimal":
+                case "double":
+                case "float":
+                    defaultValue = "0";
+                    break;
+                default:
+                    defaultValue = "UNDEFINIDED " + lst[item].FieldType;
+                    break;
+            }
+            strParams += "\t\t" + lst[item].FieldName + ": " + defaultValue + ",\n";
+            strFillParam += "\tthis.Params." + lst[item].FieldName + " = this.obj." + lst[item].FieldName + ";\n";
+        }
+        strMng_1+= strParams;
+
+        strMng_2 = "\t}\n\
+};\n\
+" + _._tableName + "Mng.prototype = Object.create(BaseMng.prototype);\n\
+" + _._tableName + "Mng.prototype.constructor = " + _._tableName + "Mng;\n\
+" + _._tableName + "Mng.prototype.fillParameters = function(option) {\n";
+
+        strMng_2 += strFillParam;
+        strMng_2 += "}\
+\n\
+module.exports = " + _._tableName + "Mng;";
+        console.log(strMng_1 + strMng_2);
     }
 
     function fillDataObjects(callback) {
