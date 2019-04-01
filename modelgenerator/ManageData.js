@@ -115,7 +115,7 @@ module.exports = " + _._tableName + "Mng;";
     function fillSQL(_, lst) {
 
         var s_SQL = '';
-        var sbSQL = '';
+        var sbSQL = 'DELIMITER // DROP PROCEDURE IF EXISTS sp_' + _._tableName + " //\n";
         var sbHeader = "CREATE PROCEDURE `" + _._database + "`.`sp_" + _._tableName + "`(\n";
         var sbParametros = '';
         var sbSelect = '';
@@ -128,7 +128,7 @@ module.exports = " + _._tableName + "Mng;";
         var sbReActive = '';
         var sbSelectEvenInactive = '';
         var sbFooter = "END CASE;\n";
-        sbFooter += "END";
+        sbFooter += "END //";
         sbParametros+="\t IN P_opcion INT\n";
         sbSelect+="WHEN 0 THEN\n";
         sbSelect+="\tSELECT\n";
@@ -152,7 +152,7 @@ module.exports = " + _._tableName + "Mng;";
         for(item in lst) {
             o = lst[item];
             if(o.IsPk)
-                sbParametros+="\t,INOUT P_" + o.FieldName + " " + o.FieldType + (o.Character_maximun_length != null ? "(" + o.Character_maximun_length + ")" : '') + "\n";
+                sbParametros+="\t,IN P_" + o.FieldName + " " + o.FieldType + (o.Character_maximun_length != null ? "(" + o.Character_maximun_length + ")" : '') + "\n";
             else
                 if(!o.IsFieldLogicalDelete)
                     sbParametros+="\t,IN P_" + o.FieldName + " " + o.FieldType + (o.Character_maximun_length != null ? "(" + o.Character_maximun_length + ")" : '') + "\n";
@@ -218,8 +218,10 @@ module.exports = " + _._tableName + "Mng;";
         //insert
         sbInsertFields+="\t)\n";
         sbInsertValues+="\t);\n";
-        if (_._primaryKey.IsPkAI)
-            sbInsertValues+="\tSET P_" + _._primaryKey.FieldName + " = LAST_INSERT_ID();\n";
+        if (_._primaryKey.IsPkAI) {
+            //sbInsertValues+="\tSET P_" + _._primaryKey.FieldName + " = LAST_INSERT_ID();\n";
+            sbInsertValues+="\tSELECT LAST_INSERT_ID() id;\n";
+        }
         sbInsert+=sbInsertFields;
         sbInsert+=sbInsertValues;
         //update
@@ -304,15 +306,13 @@ module.exports = " + _._tableName + "Mng;";
     }
 }
 
-var pool = require('../db.js');
-var dataobject = require('./DataObject.js')
-var Common = require('../../common/Common.js');
+// var o = new ManageData({
+//     conn: pool,
+//     database: 'dbcasc_qa',
+//     table: 'aduana',
+//     dataobject: dataobject,
+//     common: Common
+// });
+// o.Init();
 
-var o = new ManageData({
-    conn: pool,
-    database: 'dbcasc_qa',
-    table: 'aduana',
-    dataobject: dataobject,
-    common: Common
-});
-o.Init();
+module.exports = ManageData;

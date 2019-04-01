@@ -36,14 +36,28 @@ function fillMng(obj, callback) {
     if(callback) callback(data);
 }
 
-fillMng({
-    Name: 'Usuario'
-}, function(data) {
-    fs.writeFile("./model/" + data.Name + ".js", data.Str, function(err) {
-        if(err) {
-            return console.log(err);
-        }
+// fillMng({
+//     Name: 'Usuario'
+// }, function(data) {
+//     fs.writeFile("./model/" + data.Name + ".js", data.Str, function(err) {
+//         if(err) {
+//             return console.log(err);
+//         }
     
-        console.log("The file was saved!");
-    }); 
+//         console.log("The file was saved!");
+//     }); 
+// });
+
+var pool = require('./db.js');
+var dataobject = require('./modelgenerator/DataObject.js')
+var Common = require('../common/Common.js');
+
+var ManageData = require('./modelgenerator/ManageData');
+var o = new ManageData({
+    conn: pool,
+    database: 'dbcasc_qa',
+    table: 'aduana',
+    dataobject: dataobject,
+    common: Common
 });
+o.Init();
