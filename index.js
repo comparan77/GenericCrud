@@ -56,8 +56,58 @@ var ManageData = require('./modelgenerator/ManageData');
 var o = new ManageData({
     conn: pool,
     database: 'dbcasc_qa',
-    table: 'aduana',
+    table: 'usuario',
     dataobject: dataobject,
     common: Common
 });
-o.Init();
+
+o.Init(function(result) {
+    
+    fs.writeFile("/home/gill/documentos/node/AppCasc/model/" + result.tblName + ".js", result.strBean, function(err) {
+        if(err) {
+            return console.log(err);
+        }
+        console.log("The file was saved!");
+    });
+
+    fs.writeFile("/home/gill/documentos/node/AppCasc/model/" + result.tblName + "Mng.js", result.strMng, function(err) {
+        if(err) {
+            return console.log(err);
+        }
+        console.log("The file was saved!");
+    });
+
+    pool.getConnection(function(err, conn) {
+        if (err) throw err;
+
+        conn.beginTransaction(function(err) {
+            if(err) { throw err; }
+            conn.query(result.strSqlH, function(error, results, fields) {
+                if (error) {
+                    return conn.rollback(function() {
+                      throw error;
+                    });
+                }
+            
+                conn.query(result.strSql, function(error, results, fields) {
+                if (error) {
+                    return conn.rollback(function() {
+                      throw error;
+                    });
+                  }
+                  conn.commit(function(err) {
+                    if (err) {
+                      return conn.rollback(function() {
+                        throw err;
+                      });
+                    }
+                    console.log('success procedure!');
+                });
+                });
+            });
+        });
+        conn.release();
+    //fin get connection
+    })
+
+});

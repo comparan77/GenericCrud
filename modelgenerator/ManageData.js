@@ -8,6 +8,13 @@ function ManageData() {
     this._isLogigalDelete;
     this._primaryKey;
     this._lst = [];
+    this._result = {
+        tblName: '',
+        strBean: '',
+        strMng: '',
+        strSql: '',
+        strSqlH: ''
+    };
 
     //Define default options
     var defaults = {
@@ -24,17 +31,23 @@ function ManageData() {
     }
 
     // Public Methods
-    ManageData.prototype.Init = function() {
+    ManageData.prototype.Init = function(callback) {
         var _ = this;
         _._database = _.options.database;
         _._tableName = _.options.table.charAt(0).toUpperCase() + _.options.table.slice(1) ;
+        _._result.tblName = _._tableName;
         fillDataObjects.call(this, function() {
             if(_._primaryKey == null)
                 _._primaryKey = _._lst[0];
             fillBean(_);
             var lst = fillMng(_);
             fillSQL(_, lst);
+            if(callback) callback(_._result);
         });
+    }
+
+    ManageData.prototype.Result = function() {
+        return this._result;
     }
 
     // Private Methods
@@ -47,7 +60,7 @@ function ManageData() {
         }
 
         var strBean = "function "+ _._tableName + "() { \n" + strProperties +  "}; \nmodule.exports = " + _._tableName + ";"
-        console.log(strBean);
+        _._result.strBean = strBean; 
     }
 
     function fillMng(_) {
@@ -108,14 +121,15 @@ function " + _._tableName + "Mng (o, lst = null) {\n\
         strMng_2 += "}\
 \n\
 module.exports = " + _._tableName + "Mng;";
-        console.log(strMng_1 + strMng_2);
+        //console.log(strMng_1 + strMng_2);
+        _._result.strMng = strMng_1 + strMng_2;
         return lst;
     }
 
     function fillSQL(_, lst) {
 
         var s_SQL = '';
-        var sbSQL = 'DELIMITER // DROP PROCEDURE IF EXISTS sp_' + _._tableName + " //\n";
+        var sbSQL = '';
         var sbHeader = "CREATE PROCEDURE `" + _._database + "`.`sp_" + _._tableName + "`(\n";
         var sbParametros = '';
         var sbSelect = '';
@@ -128,7 +142,7 @@ module.exports = " + _._tableName + "Mng;";
         var sbReActive = '';
         var sbSelectEvenInactive = '';
         var sbFooter = "END CASE;\n";
-        sbFooter += "END //";
+        sbFooter += "END";
         sbParametros+="\t IN P_opcion INT\n";
         sbSelect+="WHEN 0 THEN\n";
         sbSelect+="\tSELECT\n";
@@ -256,7 +270,9 @@ module.exports = " + _._tableName + "Mng;";
         sbSQL+=sbFooter;
         s_SQL = sbSQL;
 
-        console.log(s_SQL);
+        //console.log(s_SQL);
+        _._result.strSql = s_SQL;
+        _._result.strSqlH = 'DROP PROCEDURE IF EXISTS sp_' + _._tableName;
     }
 
     function fillDataObjects(callback) {
