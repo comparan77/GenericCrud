@@ -55,22 +55,22 @@ var Common = require('../common/Common.js');
 var ManageData = require('./modelgenerator/ManageData');
 var o = new ManageData({
     conn: pool,
-    database: 'dbcasc_qa',
-    table: 'usuario',
+    database: '4_Test',
+    table: 'cliente',
     dataobject: dataobject,
     common: Common
 });
 
 o.Init(function(result) {
     
-    fs.writeFile("/home/gill/documentos/node/AppCasc/model/" + result.tblName + ".js", result.strBean, function(err) {
+    fs.writeFile("/home/gil/Develop/node/4CAD_Node/model/" + result.tblName + ".js", result.strBean, function(err) {
         if(err) {
             return console.log(err);
         }
         console.log("The file was saved!");
     });
 
-    fs.writeFile("/home/gill/documentos/node/AppCasc/model/" + result.tblName + "Mng.js", result.strMng, function(err) {
+    fs.writeFile("/home/gil/Develop/node/4CAD_Node/model/" + result.tblName + "Mng.js", result.strMng, function(err) {
         if(err) {
             return console.log(err);
         }

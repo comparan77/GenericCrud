@@ -69,7 +69,7 @@ function ManageData() {
         var strMng_1 = "var BaseMng = require('./basemng.js');\n\
 \n\
 function " + _._tableName + "Mng (o, lst = null) {\n\
-\tBaseMng.call(this, o, '" + _._tableName + "', lst);\n\
+\tBaseMng.call(this, o, '" + _.options.table + "', lst);\n\
 \n\
 \tthis.Params = {\n";
 
@@ -97,6 +97,7 @@ function " + _._tableName + "Mng (o, lst = null) {\n\
                     defaultValue = "false";
                     break;
                 case "int":
+		case "bigint":
                 case "decimal":
                 case "double":
                 case "float":
@@ -150,10 +151,10 @@ module.exports = " + _._tableName + "Mng;";
         sbSelectBy+="\tSELECT\n";
 
         sbInsert+="WHEN 2 THEN\n";
-        sbInsert+="\tINSERT INTO " + _._tableName + " (\n";
+        sbInsert+="\tINSERT INTO " + _.options.table + " (\n";
         sbInsertValues+="\tVALUES (\n";
         sbUpdate+="WHEN 3 THEN\n";
-        sbUpdate+="\tUPDATE " + _._tableName + " SET\n";
+        sbUpdate+="\tUPDATE " + _.options.table + " SET\n";
         sbDelete+="WHEN 4 THEN\n";
         sbSelectEvenInactive+="WHEN 6 THEN\n";
         sbSelectEvenInactive+="\tSELECT\n";
@@ -216,15 +217,15 @@ module.exports = " + _._tableName + "Mng;";
 
         if (_._isLogigalDelete)
             {
-                sbSelect+="\tFROM " + _._tableName + "\n";
+                sbSelect+="\tFROM " + _.options.table + "\n";
                 sbSelect+="\tWHERE IsActive = 1;\n";
             }
             else
-                sbSelect+="\tFROM " + _._tableName + ";\n";
+                sbSelect+="\tFROM " + _.options.table + ";\n";
         
-        sbSelectBy+="\tFROM " + _._tableName + "\n";
-
-        if (_._isLogigalDelete)
+        sbSelectBy+="\tFROM " + _.options.table + "\n";
+        
+	if (_._isLogigalDelete)
             sbSelectBy+="\tWHERE " + _._primaryKey.FieldName + " = P_" + _._primaryKey.FieldName + ";\n";
         else
             sbSelectBy+="\tWHERE " + _._primaryKey.FieldName + " = P_" + _._primaryKey.FieldName + ";\n";
@@ -242,17 +243,17 @@ module.exports = " + _._tableName + "Mng;";
         sbUpdate+="\tWHERE " + _._primaryKey.FieldName + " = P_" + _._primaryKey.FieldName + ";\n";
         //delete or deactive
         if (_._isLogigalDelete)
-                sbDelete+="\tUPDATE " + _._tableName + " SET IsActive = 0 WHERE " + _._primaryKey.FieldName + " = P_" + _._primaryKey.FieldName + ";\n";
+                sbDelete+="\tUPDATE " + _.options.table + " SET IsActive = 0 WHERE " + _._primaryKey.FieldName + " = P_" + _._primaryKey.FieldName + ";\n";
             else
-                sbDelete+"\tDELETE FROM " + _._tableName + " WHERE " + _._primaryKey.FieldName + " = P_" + _._primaryKey.FieldName + ";\n";
+                sbDelete+"\tDELETE FROM " + _.options.table + " WHERE " + _._primaryKey.FieldName + " = P_" + _._primaryKey.FieldName + ";\n";
 
         if (_._isLogigalDelete) {
             sbReActive+="WHEN 5 THEN\n";
-            sbReActive+="\tUPDATE " + _._tableName + " SET IsActive = 1 WHERE " + _._primaryKey.FieldName + " = P_" + _._primaryKey.FieldName + ";\n";
+            sbReActive+="\tUPDATE " + _.options.table + " SET IsActive = 1 WHERE " + _._primaryKey.FieldName + " = P_" + _._primaryKey.FieldName + ";\n";
         }
 
         if (_._isLogigalDelete) {
-            sbSelectEvenInactive+="\tFROM " + _._tableName + ";\n";
+            sbSelectEvenInactive+="\tFROM " + _.options.table + ";\n";
         }
 
         sbSQL+=sbHeader;
@@ -277,7 +278,7 @@ module.exports = " + _._tableName + "Mng;";
 
     function fillDataObjects(callback) {
         var _ = this;
-        var qry = "select column_name, data_type, case is_nullable when 'YES' then 1 else 0 end is_nullable, character_maximum_length, case column_key when 'PRI' then 1 else 0 end IsPk, case extra when 'auto_increment' then 1 else 0 end IsPkAI from information_schema.columns where table_schema = '" + this._database + "' and table_name='" + this._tableName + "';";
+        var qry = "select column_name, data_type, case is_nullable when 'YES' then 1 else 0 end is_nullable, character_maximum_length, case column_key when 'PRI' then 1 else 0 end IsPk, case extra when 'auto_increment' then 1 else 0 end IsPkAI from information_schema.columns where table_schema = '" + this._database + "' and table_name='" + _.options.table + "';";
         _.options.conn.query(qry, function(err, result, fields) {
                 if(err) throw err;
                 
