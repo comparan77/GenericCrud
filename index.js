@@ -1,40 +1,40 @@
 const fs = require('fs');
 
-function fillMng(obj, callback) {
+// function fillMng(obj, callback) {
 
-    var strMng = "var BaseMng = require('./basemng.js'); \n\
-    \n\
-    function " + obj.Name + "Mng (o, lst = null) { \n\
-    \tBaseMng.call(this, o, '" + obj.Name + "', lst) \n\
-    \n\
-    \tthis.Params = { \n\
-    \t\tOption: 0, \n\
-    \t\tId: 0, \n\
-    \t\tCodigo: '', \n\
-    \t\tNombre: '' \n\
-    \t} \n\
-    \n\
-    }; \n\
-    \n\
-    " + obj.Name + "Mng.prototype = Object.create(BaseMng.prototype); \n\
-    " + obj.Name + "Mng.prototype.constructor = " + obj.Name + "Mng; \n\
-    \n\
-    " + obj.Name + "Mng.prototype.fillParameters = function(option) { \n\
-    \tthis.Params.Option = option; \n\
-    \tthis.Params.Id = this.obj.Id; \n\
-    \tthis.Params.Codigo = this.obj.Codigo; \n\
-    \tthis.Params.Nombre = this.obj.Nombre; \n\
-    } \n\
-    \n\
-    module.exports = " + obj.Name + "Mng;";
+//     var strMng = "var BaseMng = require('./basemng.js'); \n\
+//     \n\
+//     function " + obj.Name + "Mng (o, lst = null) { \n\
+//     \tBaseMng.call(this, o, '" + obj.Name + "', lst) \n\
+//     \n\
+//     \tthis.Params = { \n\
+//     \t\tOption: 0, \n\
+//     \t\tId: 0, \n\
+//     \t\tCodigo: '', \n\
+//     \t\tNombre: '' \n\
+//     \t} \n\
+//     \n\
+//     }; \n\
+//     \n\
+//     " + obj.Name + "Mng.prototype = Object.create(BaseMng.prototype); \n\
+//     " + obj.Name + "Mng.prototype.constructor = " + obj.Name + "Mng; \n\
+//     \n\
+//     " + obj.Name + "Mng.prototype.fillParameters = function(option) { \n\
+//     \tthis.Params.Option = option; \n\
+//     \tthis.Params.Id = this.obj.Id; \n\
+//     \tthis.Params.Codigo = this.obj.Codigo; \n\
+//     \tthis.Params.Nombre = this.obj.Nombre; \n\
+//     } \n\
+//     \n\
+//     module.exports = " + obj.Name + "Mng;";
 
-    var data = {
-        Str: strMng,
-        Name: obj.Name
-    }
+//     var data = {
+//         Str: strMng,
+//         Name: obj.Name
+//     }
 
-    if(callback) callback(data);
-}
+//     if(callback) callback(data);
+// }
 
 // fillMng({
 //     Name: 'Usuario'
@@ -56,21 +56,21 @@ var ManageData = require('./modelgenerator/ManageData');
 var o = new ManageData({
     conn: pool,
     database: '4_Test',
-    table: 'cliente',
+    table: 'aduana',
     dataobject: dataobject,
     common: Common
 });
 
 o.Init(function(result) {
     
-    fs.writeFile("/home/gil/Develop/node/4CAD_Node/model/" + result.tblName + ".js", result.strBean, function(err) {
+    fs.writeFile("/home/gil/Develop/node/4CAD_Model/model/" + result.tblName + ".js", result.strBean, function(err) {
         if(err) {
             return console.log(err);
         }
         console.log("The file was saved!");
     });
 
-    fs.writeFile("/home/gil/Develop/node/4CAD_Node/model/" + result.tblName + "Mng.js", result.strMng, function(err) {
+    fs.writeFile("/home/gil/Develop/node/4CAD_Model/model/" + result.tblName + "Mng.js", result.strMng, function(err) {
         if(err) {
             return console.log(err);
         }

@@ -66,7 +66,7 @@ function ManageData() {
     function fillMng(_) {
 
         var strMng_2 = "";
-        var strMng_1 = "var BaseMng = require('./basemng.js');\n\
+        var strMng_1 = "var BaseMng = require('../_common/basemng.js');\n\
 \n\
 function " + _._tableName + "Mng (o, lst = null) {\n\
 \tBaseMng.call(this, o, '" + _.options.table + "', lst);\n\
