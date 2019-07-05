@@ -56,7 +56,7 @@ var ManageData = require('./modelgenerator/ManageData');
 var o = new ManageData({
     conn: pool,
     database: '4_Test',
-    table: 'transporte_linea',
+    table: 'mercancia_vendor',
     dataobject: dataobject,
     common: Common
 });
