@@ -25,13 +25,13 @@ rl.question('Nombre de la tabla ', (tblName) => {
       common: Common
   });
 
-  console.log(JSON.stringify(o));
+  GenericCode(o);
 
   rl.close();
 });
 
 
-function GenericCode() {
+function GenericCode(o) {
   o.Init(function(result) {
       
       fs.writeFile("/home/gil/Develop/node/4CAD_Model/model/" + result.tblName + ".js", result.strBean, function(err) {
