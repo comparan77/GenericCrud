@@ -244,8 +244,8 @@ module.exports = " + _._tableName + "Mng;";
         //delete or deactive
         if (_._isLogigalDelete)
                 sbDelete+="\tUPDATE " + _.options.table + " SET IsActive = 0 WHERE " + _._primaryKey.FieldName + " = P_" + _._primaryKey.FieldName + ";\n";
-            else
-                sbDelete+"\tDELETE FROM " + _.options.table + " WHERE " + _._primaryKey.FieldName + " = P_" + _._primaryKey.FieldName + ";\n";
+            else 
+                sbDelete+="\tDELETE FROM " + _.options.table + " WHERE " + _._primaryKey.FieldName + " = P_" + _._primaryKey.FieldName + ";\n";
 
         if (_._isLogigalDelete) {
             sbReActive+="WHEN 5 THEN\n";
@@ -262,6 +262,7 @@ module.exports = " + _._tableName + "Mng;";
         sbSQL+=sbSelectBy;
         sbSQL+=sbInsert;
         sbSQL+=sbUpdate;
+	console.log('sbDelete es: ' + sbDelete);
         sbSQL+=sbDelete;
         if (_._isLogigalDelete)
         {
