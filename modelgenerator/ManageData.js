@@ -262,7 +262,7 @@ module.exports = " + _._tableName + "Mng;";
         sbSQL+=sbSelectBy;
         sbSQL+=sbInsert;
         sbSQL+=sbUpdate;
-	console.log('sbDelete es: ' + sbDelete);
+	// console.log('sbDelete es: ' + sbDelete);
         sbSQL+=sbDelete;
         if (_._isLogigalDelete)
         {
