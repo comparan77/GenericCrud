@@ -97,7 +97,7 @@ function " + _._tableName + "Mng (o, lst = null) {\n\
                     defaultValue = "false";
                     break;
                 case "int":
-		case "bigint":
+		        case "bigint":
                 case "decimal":
                 case "double":
                 case "float":
@@ -167,10 +167,10 @@ module.exports = " + _._tableName + "Mng;";
         for(item in lst) {
             o = lst[item];
             if(o.IsPk)
-                sbParametros+="\t,IN P_" + o.FieldName + " " + o.FieldType + (o.Character_maximun_length != null ? "(" + o.Character_maximun_length + ")" : '') + "\n";
+                sbParametros+="\t,IN P_" + o.FieldName + " " + o.ColumnType + "\n";
             else
                 if(!o.IsFieldLogicalDelete)
-                    sbParametros+="\t,IN P_" + o.FieldName + " " + o.FieldType + (o.Character_maximun_length != null ? "(" + o.Character_maximun_length + ")" : '') + "\n";
+                    sbParametros+="\t,IN P_" + o.FieldName + " " + o.ColumnType + "\n";
             
             if (indiceCampoIdAi == 0)
             {
@@ -279,7 +279,7 @@ module.exports = " + _._tableName + "Mng;";
 
     function fillDataObjects(callback) {
         var _ = this;
-        var qry = "select column_name, data_type, case is_nullable when 'YES' then 1 else 0 end is_nullable, character_maximum_length, case column_key when 'PRI' then 1 else 0 end IsPk, case extra when 'auto_increment' then 1 else 0 end IsPkAI from information_schema.columns where table_schema = '" + this._database + "' and table_name='" + _.options.table + "';";
+        var qry = "select column_name, data_type, column_type, case is_nullable when 'YES' then 1 else 0 end is_nullable, character_maximum_length, case column_key when 'PRI' then 1 else 0 end IsPk, case extra when 'auto_increment' then 1 else 0 end IsPkAI from information_schema.columns where table_schema = '" + this._database + "' and table_name='" + _.options.table + "';";
         _.options.conn.query(qry, function(err, result, fields) {
                 if(err) throw err;
                 
@@ -296,6 +296,7 @@ module.exports = " + _._tableName + "Mng;";
                         _._isLogigalDelete = true;
                     }
                     o.FieldType = row.data_type;
+                    o.ColumnType = row.column_type;
                     o.IsNull = row.is_nullable == 0 ? false : true;
                     o.Character_maximun_length = 0;
                     if(row.character_maximum_length!=null) {
