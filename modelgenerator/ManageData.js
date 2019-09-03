@@ -56,7 +56,7 @@ function ManageData() {
         var strProperties = '';
         var item;
         for(item in _._lst) {
-            strProperties += "\tthis." + _._lst[item].FieldName + ";\n"
+            strProperties += "\tthis." + _._lst[item].FieldName + " = null;\n"
         }
 
         var strBean = "function "+ _._tableName + "() { \n" + strProperties +  "}; \nmodule.exports = " + _._tableName + ";"
@@ -108,7 +108,7 @@ function " + _._tableName + "Mng (o, lst = null) {\n\
                     break;
             }
             strParams += "\t\t" + lst[item].FieldName + ": " + defaultValue + ",\n";
-            strFillParam += "\tthis.Params." + lst[item].FieldName + " = this.obj." + lst[item].FieldName + ";\n";
+            strFillParam += "\tthis.Params." + lst[item].FieldName + " = this.obj." + lst[item].FieldName + " == null ? this.Params." + lst[item].FieldName + " : this.obj." + lst[item].FieldName + ";\n";
         }
         strMng_1+= strParams;
 
