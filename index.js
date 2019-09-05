@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 
 var pool = require('./db.js');
 var dataobject = require('./modelgenerator/DataObject.js')
@@ -33,15 +34,17 @@ rl.question('Nombre de la tabla ', (tblName) => {
 
 function GenericCode(o) {
   o.Init(function(result) {
-      
-      fs.writeFile("/home/gil/Develop/node/4CAD_Model/model/" + result.tblName + ".js", result.strBean, function(err) {
+      	var rootPath = __dirname;
+	var myPath = path.basename(rootPath);
+	rootPath = rootPath.replace(myPath, '');
+      fs.writeFile(rootPath + "4CAD_Model/model/" + result.tblName + ".js", result.strBean, function(err) {
           if(err) {
               return console.log(err);
           }
           console.log("The file was saved!");
       });
 
-      fs.writeFile("/home/gil/Develop/node/4CAD_Model/model/" + result.tblName + "Mng.js", result.strMng, function(err) {
+      fs.writeFile(rootPath + "4CAD_Model/model/" + result.tblName + "Mng.js", result.strMng, function(err) {
           if(err) {
               return console.log(err);
           }
