@@ -92,10 +92,12 @@ function " + _._tableName + "Mng (o, lst = null) {\n\
                 case "date":
                 case "datetime":
                     defaultValue = "''";
+                    strParams += "\t\t" + lst[item].FieldName + ": " + defaultValue + ",\n";
                     break;
                 case "tinyint":
                 case "bit":
                     defaultValue = "false";
+                    strParams += "\t\t" + lst[item].FieldName + ": " + defaultValue + ",\n";
                     break;
                 case "int":
 		        case "bigint":
@@ -103,12 +105,12 @@ function " + _._tableName + "Mng (o, lst = null) {\n\
                 case "double":
                 case "float":
                     defaultValue = "0";
+                    strParams += "\t\t" + lst[item].FieldName + ": " + defaultValue + ",\n";
                     break;
                 default:
                     defaultValue = "UNDEFINIDED " + lst[item].FieldType;
                     break;
             }
-            strParams += "\t\t" + lst[item].FieldName + ": " + defaultValue + ",\n";
             strFillParam += "\tthis.Params." + lst[item].FieldName + " = this.obj." + lst[item].FieldName + " == null ? this.Params." + lst[item].FieldName + " : this.obj." + lst[item].FieldName + ";\n";
             strFillQslBy += lst[item].FieldName + ", ";
         }
@@ -173,16 +175,49 @@ module.exports = " + _._tableName + "Mng;";
             if(o.IsPk)
                 sbParametros+="\t,IN P_" + o.FieldName + " " + o.ColumnType + "\n";
             else
-                if(!o.IsFieldLogicalDelete)
-                    sbParametros+="\t,IN P_" + o.FieldName + " " + o.ColumnType + "\n";
+                if(!o.IsFieldLogicalDelete) {
+                    switch (lst[item].FieldType) {
+                        case 'varchar':
+                        case 'char':
+                        case "time":
+                        case "blob":
+                        case "date":
+                        case "datetime":
+                        case "tinyint":
+                        case "bit":
+                        case "int":
+                        case "bigint":
+                        case "decimal":
+                        case "double":
+                        case "float":
+                            sbParametros+="\t,IN P_" + o.FieldName + " " + o.ColumnType + "\n";
+                            break;
+                    }
+                }
             
             if (indiceCampoIdAi == 0)
             {
                 if (!o.IsPk || !o.IsPkAI)
                 {
-                    sbInsertFields+="\t\t " + o.FieldName + "\n";
-                    sbInsertValues+="\t\t P_" + o.FieldName + "\n";
-                    sbUpdate+="\t\t " + o.FieldName + " = " + "P_" + o.FieldName + "\n";
+                    switch (lst[item].FieldType) {
+                        case 'varchar':
+                        case 'char':
+                        case "time":
+                        case "blob":
+                        case "date":
+                        case "datetime":
+                        case "tinyint":
+                        case "bit":
+                        case "int":
+                        case "bigint":
+                        case "decimal":
+                        case "double":
+                        case "float":
+                            sbInsertFields+="\t\t " + o.FieldName + "\n";
+                            sbInsertValues+="\t\t P_" + o.FieldName + "\n";
+                            sbUpdate+="\t\t " + o.FieldName + " = " + "P_" + o.FieldName + "\n";
+                            break;
+                    }
                 }
                 else
                     indiceCampoIdAi--;
@@ -191,10 +226,26 @@ module.exports = " + _._tableName + "Mng;";
             {
                 if (!o.IsFieldLogicalDelete)
                 {
-                    sbInsertFields+="\t\t," + o.FieldName + "\n";
-                    sbInsertValues+="\t\t,P_" + o.FieldName + "\n";
+                    switch (lst[item].FieldType) {
+                        case 'varchar':
+                        case 'char':
+                        case "time":
+                        case "blob":
+                        case "date":
+                        case "datetime":
+                        case "tinyint":
+                        case "bit":
+                        case "int":
+                        case "bigint":
+                        case "decimal":
+                        case "double":
+                        case "float":
+                            sbInsertFields+="\t\t," + o.FieldName + "\n";
+                            sbInsertValues+="\t\t,P_" + o.FieldName + "\n";
 
-                    sbUpdate+="\t\t," + o.FieldName + " = " + "P_" + o.FieldName + "\n";
+                            sbUpdate+="\t\t," + o.FieldName + " = " + "P_" + o.FieldName + "\n";
+                            break; 
+                    }
                 }
             }
 
