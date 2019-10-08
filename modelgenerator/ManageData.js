@@ -93,11 +93,13 @@ function " + _._tableName + "Mng (o, lst = null) {\n\
                 case "datetime":
                     defaultValue = "''";
                     strParams += "\t\t" + lst[item].FieldName + ": " + defaultValue + ",\n";
+                    strFillParam += "\tthis.Params." + lst[item].FieldName + " = this.obj." + lst[item].FieldName + " == null ? this.Params." + lst[item].FieldName + " : this.obj." + lst[item].FieldName + ";\n";
                     break;
                 case "tinyint":
                 case "bit":
                     defaultValue = "false";
                     strParams += "\t\t" + lst[item].FieldName + ": " + defaultValue + ",\n";
+                    strFillParam += "\tthis.Params." + lst[item].FieldName + " = this.obj." + lst[item].FieldName + " == null ? this.Params." + lst[item].FieldName + " : this.obj." + lst[item].FieldName + ";\n";
                     break;
                 case "int":
 		        case "bigint":
@@ -106,12 +108,12 @@ function " + _._tableName + "Mng (o, lst = null) {\n\
                 case "float":
                     defaultValue = "0";
                     strParams += "\t\t" + lst[item].FieldName + ": " + defaultValue + ",\n";
+                    strFillParam += "\tthis.Params." + lst[item].FieldName + " = this.obj." + lst[item].FieldName + " == null ? this.Params." + lst[item].FieldName + " : this.obj." + lst[item].FieldName + ";\n";
                     break;
                 default:
                     defaultValue = "UNDEFINIDED " + lst[item].FieldType;
                     break;
             }
-            strFillParam += "\tthis.Params." + lst[item].FieldName + " = this.obj." + lst[item].FieldName + " == null ? this.Params." + lst[item].FieldName + " : this.obj." + lst[item].FieldName + ";\n";
             strFillQslBy += lst[item].FieldName + ", ";
         }
         strFillQslBy = strFillQslBy.substr(0, strFillQslBy.length-2);
