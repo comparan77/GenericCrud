@@ -13,7 +13,8 @@ function ManageData() {
         strBean: '',
         strMng: '',
         strSql: '',
-        strSqlH: ''
+        strSqlH: '',
+        strFac: ''
     };
 
     //Define default options
@@ -22,7 +23,8 @@ function ManageData() {
         database: '',
         table: '',
         dataobject: null,
-        common: null
+        common: null,
+        rootPath: null
     }
 
     // Create options by extending defaults with the passed in arugments
@@ -36,13 +38,19 @@ function ManageData() {
         _._database = _.options.database;
         _._tableName = _.options.table.charAt(0).toUpperCase() + _.options.table.slice(1) ;
         _._result.tblName = _._tableName;
-        fillDataObjects.call(this, function() {
+        fillDataObjects.call(this, function() {            
+
             if(_._primaryKey == null)
                 _._primaryKey = _._lst[0];
             fillBean(_);
             var lst = fillMng(_);
             fillSQL(_, lst);
-            if(callback) callback(_._result);
+            
+            fillFactory(_, ()=> {
+                if(callback) callback(_._result);
+            });
+            
+            
         });
     }
 
@@ -51,6 +59,77 @@ function ManageData() {
     }
 
     // Private Methods
+
+    function fillFactory(_, callback) {
+
+
+        const testFolder = _.options.rootPath + "4CAD_Model/model/";
+        const fs = require('fs');
+        console.log(_.options.rootPath + "4CAD_Model/model/")
+
+        var strAll = ""
+        var strB = '';
+        var strCreateObj = ""
+
+        var strCreateMng = '';
+        var strFactory = ''
+
+        strFactory = 'function Factory() {\n';
+
+        strCreateObj += "\tthis.CreateObj = function(type) {\n"
+        strCreateObj += "\t\tvar o;\n"
+        strCreateObj += "\t\tswitch (type) {\n\n"
+
+        strCreateMng += "\tthis.CreateMng = function(o) {\n"
+        strCreateMng += "\t\tvar oMng;\n"
+        strCreateMng += "\t\tswitch (o.type) {\n\n"
+
+        var vTbl = '';
+
+        fs.readdir(testFolder, (err, files) => {
+            if(files.find((obj)=> {return obj == _._tableName + ".js"}) == undefined)
+                files.push(_.options.table)
+            
+            files.forEach(file => {
+                vTbl = file.replace('.js','');
+                if(!vTbl.endsWith('Mng') && vTbl!='Factory'){
+                    strB += "var " + vTbl + " = require('./" + vTbl + ".js');\n"
+                    strB += "var " + vTbl + "Mng = require('./" + vTbl + "Mng.js');\n\n"
+
+                    strCreateObj += "\t\t\tcase '" + vTbl + "':\n"
+                    strCreateObj += "\t\t\t\to = new " + vTbl + "();\n"
+                    strCreateObj += "\t\t\t\tbreak;\n"
+
+                    strCreateMng += "\t\t\tcase '" + vTbl + "':\n"
+                    strCreateMng += "\t\t\t\toMng = new " + vTbl + "Mng(o);\n"
+                    strCreateMng += "\t\t\t\tbreak;\n"
+                }
+            });
+
+            strCreateObj += "\t\t}\n"
+            strCreateObj += "\t\to.type = type;\n"
+            strCreateObj += "\t\treturn o;\n"
+            strCreateObj += "\t}\n"
+
+            strCreateMng += "\t\t}\n"
+            strCreateMng += "\t\treturn oMng;\n"
+            strCreateMng += "\t}\n"
+
+            strFactory += strCreateObj;
+            strFactory += strCreateMng;
+            strFactory += "};\n"
+            strFactory += "module.exports = Factory;"
+
+            strAll += strB;
+            strAll += strFactory;
+
+            _._result.strFac = strAll; 
+
+            callback();
+        });
+
+    }
+
     function fillBean(_) {
 
         var strProperties = '';

@@ -18,12 +18,17 @@ rl.question('Nombre de la tabla ', (tblName) => {
   // TODO: Log the answer in a database
   // console.log(`Thank you for your valuable feedback: ${answer}`);
 
+  var rootPath = __dirname;
+	var myPath = path.basename(rootPath);
+	rootPath = rootPath.replace(myPath, '');
+
   var o = new ManageData({
       conn: pool,
       database: '4_Test',
       table: tblName,
       dataobject: dataobject,
-      common: Common
+      common: Common,
+      rootPath: rootPath
   });
 
   GenericCode(o);
@@ -49,6 +54,13 @@ function GenericCode(o) {
               return console.log(err);
           }
           console.log("The file was saved!");
+      });
+
+      fs.writeFile(rootPath + "4CAD_Model/model/Factory.js", result.strFac, function(err) {
+          if(err) {
+              return console.log(err);
+          }
+          console.log("The file Factory was saved!");
       });
 
       pool.getConnection(function(err, conn) {
