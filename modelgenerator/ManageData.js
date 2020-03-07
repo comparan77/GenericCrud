@@ -424,7 +424,7 @@ module.exports = " + _._tableName + "Mng;";
                     var row = result[key];
                     var o = new _.options.dataobject();
                     
-                    o.FieldName = _.options.common.Capitalize(row.column_name.toLowerCase());
+                    o.FieldName = row.column_name; //_.options.common.Capitalize(row.column_name.toLowerCase());
                     o.IsFieldLogicalDelete = false;
                     if(o.FieldName == 'Isactive') {
                         o.FieldName = "IsActive";
